@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <EditText
+        android:id="@+id/txtField_message"
+        android:layout_width="294dp"
+        android:layout_height="71dp"
+        android:layout_marginStart="58dp"
+        android:layout_marginTop="98dp"
+        android:layout_marginEnd="59dp"
+        android:layout_marginBottom="33dp"
+        android:autofillHints="message"
+        android:inputType="text"
+        android:text="WonderWoman"
+        app:layout_constraintBottom_toTopOf="@+id/button_send_post"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="LabelFor,SpeakableTextPresentCheck" />
+
+    <Button
+        android:id="@+id/button_send_post"
+        android:layout_width="233dp"
+        android:layout_height="64dp"
+        android:layout_marginStart="105dp"
+        android:layout_marginTop="33dp"
+        android:layout_marginEnd="106dp"
+        android:layout_marginBottom="24dp"
+        android:backgroundTint="@color/design_default_color_primary"
+        android:text="send_post_request"
+        app:layout_constraintBottom_toTopOf="@+id/button_send_get"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txtField_message"
+        tools:ignore="SpeakableTextPresentCheck" />
+
+    <Button
+        android:id="@+id/button_send_get"
+        android:layout_width="234dp"
+        android:layout_height="65dp"
+        android:layout_marginStart="105dp"
+        android:layout_marginTop="7dp"
+        android:layout_marginEnd="106dp"
+        android:layout_marginBottom="18dp"
+        android:backgroundTint="@color/design_default_color_primary_dark"
+        android:text="send_get_request"
+        app:layout_constraintBottom_toTopOf="@+id/textView_response"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button_send_post"
+        tools:ignore="SpeakableTextPresentCheck" />
+
+    <TextView
+        android:id="@+id/textView_response"
+        android:layout_width="283dp"
+        android:layout_height="96dp"
+        android:layout_marginStart="58dp"
+        android:layout_marginTop="41dp"
+        android:layout_marginEnd="70dp"
+        android:layout_marginBottom="232dp"
+        android:text="response_text_will_display_here"
+        android:textAlignment="center"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button_send_get" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

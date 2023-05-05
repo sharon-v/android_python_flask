@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">My App</string>
+    <string name="response_text" />
+    <string name="send_get_request" />
+    <string name="send_post_request" />
+    <string name="temporary" />
+    <string name="WonderWoman" />
+    <string name="response_text_will_display_here" />
+</resources>
