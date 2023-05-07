@@ -68,7 +68,6 @@ def print_success():
 
 
 def detect(model, lm_list):
-    global label
     lm_list = np.array(lm_list)
     lm_list = np.expand_dims(lm_list, axis=-1)
     results = model.predict(lm_list, verbose=0)
@@ -231,4 +230,77 @@ def squatDetect():
     print_success()
 
 
-# squatDetect()
+def image_processing(image_to_analyze: np.ndarray):
+    model = tf.keras.models.load_model('medium_squat_cnn_model3.h5')
+
+    n_time_steps = no_of_timesep_squat
+    lm_list = []
+    label = None
+    image = None
+    nose = 0
+    r_hip = 0
+    l_hip = 0
+    flag = True
+    counter = 0
+    fps = 0
+    mpPose = mp.solutions.pose
+    pose = mpPose.Pose()
+
+    mpDraw = mp.solutions.drawing_utils
+
+    img = cv2.imdecode(np.frombuffer(image_to_analyze, dtype=np.uint8), cv2.IMREAD_UNCHANGED)
+
+    if img is None:
+        print_success()
+        raise Exception("Image is empty")
+
+    imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+    results = pose.process(imgRGB)
+
+    try:
+        angle = 0
+        # landmarks = results.pose_landmarks.landmark
+        landmarks = results.pose_landmarks
+
+        # prevents the camera from closing if there are no landmarks
+        if landmarks is not None:
+            landmarks = landmarks.landmark
+
+            if flag:
+                nose = landmarks[mpPose.PoseLandmark.NOSE.value]
+                r_hip = landmarks[mpPose.PoseLandmark.RIGHT_HIP.value]
+                l_hip = landmarks[mpPose.PoseLandmark.LEFT_HIP.value]
+                flag = False
+
+            # print(f"nose={nose.y}\nrhip={r_hip.y}\nlhip={l_hip.y}\n")
+            # Check if the user is squatting
+
+            cv2.putText(img, str(angle), tuple(np.multiply(
+                [landmarks[mpPose.PoseLandmark.LEFT_HIP.value].x, landmarks[mpPose.PoseLandmark.LEFT_HIP.value].y],
+                [640, 480]).astype(int)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1, cv2.LINE_AA)
+
+            # print(angle)
+
+            if results.pose_landmarks:
+                c_lm = make_landmark_timestep(results)
+
+                lm_list.append(c_lm)
+                # if len(lm_list) == n_time_steps:
+                label = detect(model, lm_list)
+                lm_list = []
+
+                img = draw_landmark_on_image(mpDraw, results, imgRGB, mpPose)
+
+            img = draw_class_on_image(label, counter, img)
+            # cv2.imshow("Image", img)
+            # convert image to bytes
+            _, buffer = cv2.imencode('.jpg', img)
+            image = buffer.tobytes()
+
+            return image, label
+        return None, "Body not detected"
+
+    except ValueError:
+        label = "Body not detected"
+        print(label)

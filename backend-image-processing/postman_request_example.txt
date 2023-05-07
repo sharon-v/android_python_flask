@@ -1,0 +1,3 @@
+curl --location 'http://localhost:5002/analyze-image' \
+--header 'Content-Type: image/png' \
+--data '@/Users/taltal/develop/personal/android_python_flask/backend-image-processing/tmp/img.png'
