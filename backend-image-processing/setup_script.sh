@@ -5,12 +5,14 @@ pip install venv
 python -m venv venv
 
 # which pyhon /Users/yanivbenzvi/.pyenv/shims/python
+source venv/Scripts/activate
+
 
 # activate virtual env
 source venv/bin/activate
 # which pyhon
 
-deactive virtual env
+active virtual env
 deactivate
 
 # install dependencies
