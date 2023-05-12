@@ -1,21 +1,45 @@
 package com.ai.myapp;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Camera;
+import android.graphics.ImageFormat;
+import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraCaptureSession;
+import android.hardware.camera2.CameraDevice;
+import android.hardware.camera2.CameraMetadata;
+import android.hardware.camera2.CaptureRequest;
+import android.media.Image;
+import android.media.ImageReader;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.Manifest;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Collections;
 import java.util.concurrent.TimeUnit;
+
+import java.util.Timer;
+import java.util.TimerTask;
+
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -35,11 +59,14 @@ public class MainActivity extends AppCompatActivity {
     private Button button_send_post;
     private Button button_send_get;
     private TextView textView_response;
+    private ImageView imageView;
+
+    private Timer timer;
     private String url = "http://192.168.1.162:5000";// *****put your URL here*********
     private String POST = "POST";
     private String GET = "GET";
     private ExecutorService executorService = Executors.newFixedThreadPool(5);
-    private static final int CAMERA_PERMISSION_REQUEST_CODE = 100;
+    private ActivityResultLauncher<Intent> mStartForResultLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +77,33 @@ public class MainActivity extends AppCompatActivity {
         button_send_post = findViewById(R.id.button_send_post);
         button_send_get = findViewById(R.id.button_send_get);
         textView_response = findViewById(R.id.textView_response);
+        imageView = findViewById(R.id.imageView);
+
+        // Start the video capture activity
+//        Intent videoCaptureIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+//        videoCaptureIntent.putExtra(MediaStore.EXTRA_DURATION_LIMIT, 10);
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            mStartForResultLauncher.launch(takePictureIntent);
+        }
+
+        // Set up the activity result launcher for taking pictures
+        mStartForResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+                new ActivityResultCallback<ActivityResult>() {
+                    @Override
+                    public void onActivityResult(ActivityResult result) {
+                        if (result.getResultCode() == RESULT_OK) {
+                            Bundle extras = result.getData().getExtras();
+                            Bitmap imageBitmap = (Bitmap) extras.get("data");
+                            imageView.setImageBitmap(imageBitmap);
+                        }
+                    }
+                });
+
+        // Set up a timer to take a picture every 3 seconds
+        timer = new Timer();
+        timer.schedule(new TakePictureTask(), 0, 30000); // take a picture every 3 seconds
+
 
         /*making a post request.*/
         button_send_post.setOnClickListener(view -> {
@@ -140,4 +194,68 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+    private class TakePictureTask extends TimerTask {
+        private CameraDevice cameraDevice;
+        private ImageReader imageReader;
+        private static final int IMAGE_WIDTH = 640;
+        private static final int IMAGE_HEIGHT = 480;
+
+        public TakePictureTask(CameraDevice cameraDevice) {
+            this.cameraDevice = cameraDevice;
+
+            // Initialize an ImageReader to capture the image
+            imageReader = ImageReader.newInstance(IMAGE_WIDTH, IMAGE_HEIGHT, ImageFormat.JPEG, 1);
+        }
+
+        @Override
+        public void run() {
+            try {
+                // Create a CaptureRequest.Builder and set the necessary parameters
+                CaptureRequest.Builder captureBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
+                captureBuilder.addTarget(imageReader.getSurface());
+                captureBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
+
+                // Capture the image
+                CameraCaptureSession.CaptureCallback captureCallback = new CameraCaptureSession.CaptureCallback() {
+                    @Override
+                    public void onCaptureCompleted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull TotalCaptureResult result) {
+                        super.onCaptureCompleted(session, request, result);
+
+                        // Save the image to a file
+                        Image image = imageReader.acquireLatestImage();
+                        File file = new File(getFilesDir(), "image.jpg");
+                        try {
+                            OutputStream outputStream = new FileOutputStream(file);
+                            ImageUtils.saveImage(outputStream, image);
+                            outputStream.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        } finally {
+                            image.close();
+                        }
+                    }
+                };
+
+                cameraDevice.createCaptureSession(Collections.singletonList(imageReader.getSurface()), new CameraCaptureSession.StateCallback() {
+                    @Override
+                    public void onConfigured(@NonNull CameraCaptureSession session) {
+                        try {
+                            session.capture(captureBuilder.build(), captureCallback, null);
+                        } catch (CameraAccessException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    @Override
+                    public void onConfigureFailed(@NonNull CameraCaptureSession session) {
+                        session.close();
+                    }
+                }, null);
+            } catch (CameraAccessException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 }
