@@ -57,8 +57,8 @@
 
     <TextView
         android:id="@+id/textView_response"
-        android:layout_width="283dp"
-        android:layout_height="96dp"
+        android:layout_width="287dp"
+        android:layout_height="158dp"
         android:layout_marginStart="58dp"
         android:layout_marginTop="41dp"
         android:layout_marginEnd="70dp"
@@ -67,8 +67,32 @@
         android:textAlignment="center"
         android:textSize="24sp"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/button_open_camera"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+
         app:layout_constraintTop_toBottomOf="@+id/button_send_get" />
+    <Button
+        android:id="@+id/button_open_camera"
+        android:layout_width="234dp"
+        android:layout_height="65dp"
+        android:layout_marginStart="105dp"
+        android:layout_marginTop="7dp"
+        android:layout_marginEnd="106dp"
+        android:layout_marginBottom="18dp"
+        android:backgroundTint="@color/design_default_color_primary_dark"
+        android:text="open_camera"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView_response"
+        tools:ignore="SpeakableTextPresentCheck" />
+
+    <ImageView
+        android:id="@+id/click_image"
+        android:layout_width="413dp"
+        android:layout_height="74dp"
+        tools:ignore="MissingConstraints">
+
+    </ImageView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
