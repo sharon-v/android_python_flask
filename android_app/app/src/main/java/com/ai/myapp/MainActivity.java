@@ -6,28 +6,25 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.core.content.FileProvider;
 
 import android.app.Activity;
-import android.content.ContentProviderOperation;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.hardware.camera2.CameraManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
+import android.os.CountDownTimer;
 import android.provider.MediaStore;
-import android.util.Base64;
 import android.util.Log;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.Manifest;
 
 import org.apache.commons.io.IOUtils;
 
@@ -36,8 +33,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Call;
@@ -70,13 +65,19 @@ public class MainActivity extends AppCompatActivity {
     private static final int CAMERA_REQUEST_CODE = 101;
     private Uri contentUri;
 
-
+    private static final long COUNTDOWN_TIME_MS = 3000;
+    private CountDownTimer timer;
 
     // Define the pic id
     private static final int pic_id = 123;
     // Define the button and imageview type variable
     Button button_open_camera;
     ImageView click_image_id;
+
+
+    // Declare class variables
+    private CameraManager cameraManager;
+    private String cameraId;
 
 
     @Override
@@ -87,13 +88,18 @@ public class MainActivity extends AppCompatActivity {
         // By ID we can get each component which id is assigned in XML file get Buttons and imageview.
         button_open_camera = findViewById(R.id.button_open_camera);
         click_image_id = findViewById(R.id.click_image);
+
         // Camera_open button is for open the camera and add the setOnClickListener in this button
         button_open_camera.setOnClickListener(v -> {
             // Create the camera_intent ACTION_IMAGE_CAPTURE it will open the camera for capture the image
+
             Intent camera_intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+//            camera_intent.putExtra(MediaStore.EXTRA_SCREEN_ORIENTATION, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
             // Start the activity with camera_intent, and request pic id
             startActivityForResult(camera_intent, pic_id);
         });
+
 
 //        textField_message = findViewById(R.id.txtField_message);
         button_send_post = findViewById(R.id.button_send_post);
@@ -167,7 +173,29 @@ public class MainActivity extends AppCompatActivity {
             // BitMap is data structure of image file which store the image in memory
             Bitmap photo = (Bitmap) data.getExtras().get("data");
             // Set the image in imageview for display
-            click_image_id.setImageBitmap(photo);
+            // Rotate the photo
+            Matrix matrix = new Matrix();
+            matrix.postRotate(270); // Rotate by 90 degrees (adjust the angle as needed)
+            Bitmap bitmap = Bitmap.createBitmap(photo, 0, 0, photo.getWidth(), photo.getHeight(), matrix, true);
+//            Bitmap bitmap = photo.copy(Bitmap.Config.ARGB_8888, true);
+            // Create a canvas from the bitmap
+            Canvas canvas = new Canvas(bitmap);
+
+// Create a Paint object for drawing text
+            Paint textPaint = new Paint();
+            textPaint.setColor(Color.WHITE);
+            textPaint.setTextSize(30);
+
+// Define the text to be drawn
+            String text = "Your Text Here";
+
+// Calculate the position to draw the text (adjust the coordinates as needed)
+            int x = 50;
+            int y = 50;
+
+// Draw the text on the canvas
+            canvas.drawText(text, x, y, textPaint);
+            click_image_id.setImageBitmap(bitmap);
 
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
             photo.compress(Bitmap.CompressFormat.PNG, 100, stream);
