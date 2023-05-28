@@ -1,68 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    android:layout_height="match_parent">
 
-
-
-    <TextView
-        android:id="@+id/textView_response"
-        android:layout_width="272dp"
-        android:layout_height="62dp"
-        android:layout_marginTop="92dp"
-        android:text="response_text_will_display_here"
-        android:textAlignment="center"
-        android:textSize="24sp"
-
-        tools:ignore="MissingConstraints"
-        tools:layout_editor_absoluteX="69dp" />
+    <androidx.camera.view.PreviewView
+        android:id="@+id/previewView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
     <Button
-        android:id="@+id/button_close_camera"
-        android:layout_width="234dp"
-        android:layout_height="65dp"
-        android:layout_marginTop="28dp"
-        android:layout_marginEnd="96dp"
-        android:backgroundTint="@color/design_default_color_primary_dark"
-        android:text="close_camera"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/click_image"
-        tools:ignore="SpeakableTextPresentCheck" />
-
-    <Button
-        android:id="@+id/button_open_camera"
-        android:layout_width="234dp"
-        android:layout_height="65dp"
-        android:layout_marginTop="108dp"
-        android:layout_marginEnd="92dp"
-        android:backgroundTint="@color/design_default_color_primary_dark"
-        android:text="open_camera"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/click_image"
-        tools:ignore="SpeakableTextPresentCheck" />
-
-    <Button
-        android:id="@+id/button_capture"
+        android:id="@+id/captureButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:text="Capture"
-        tools:ignore="MissingConstraints"
-        tools:layout_editor_absoluteX="153dp"
-        tools:layout_editor_absoluteY="667dp" />
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:text="Capture" />
+
+    <SurfaceView
+        android:id="@+id/surface_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
 
     <ImageView
         android:id="@+id/click_image"
-        android:layout_width="361dp"
-        android:layout_height="139dp"
-        android:layout_marginTop="188dp"
-        tools:ignore="MissingConstraints"
-        tools:layout_editor_absoluteX="25dp">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/captureButton"
+        android:adjustViewBounds="true"
+        android:scaleType="centerCrop"/>
 
+    <TextView
+        android:id="@+id/textView_response"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/captureButton"
+        android:layout_marginTop="16dp"
+        android:textSize="18sp"
+        android:textColor="#000000"
+        android:gravity="center"/>
 
-    </ImageView>
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</RelativeLayout>
