@@ -252,6 +252,7 @@ def image_processing(image_to_analyze: np.ndarray):
 
     if img is None:
         print_success()
+
         raise Exception("Image is empty")
 
     imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -296,8 +297,9 @@ def image_processing(image_to_analyze: np.ndarray):
             # cv2.imshow("Image", img)
             # convert image to bytes
             _, buffer = cv2.imencode('.jpg', img)
-            image = buffer.tobytes()
 
+            image = buffer.tobytes()
+            cv2.imwrite("a.png",img)
             return image, label
         return None, "Body not detected"
 
