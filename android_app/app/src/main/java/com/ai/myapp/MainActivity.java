@@ -265,6 +265,13 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                         // Update the text view with the extracted text
                         textView_response.setText(extractedText);
                     });
+                    File imageFile = new File(imagePath);
+                    boolean deleted = imageFile.delete();
+                    if (deleted) {
+                        Log.d("sendImageToServer", "Image deleted successfully");
+                    } else {
+                        Log.d("sendImageToServer", "Failed to delete image");
+                    }
                 }
 
             });
