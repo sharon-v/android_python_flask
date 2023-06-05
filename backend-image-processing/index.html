@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Real-time Image Processing</title>
+<!--    <script type="text/javascript">-->
+<!--        function updateFrame() {-->
+<!--            var img = document.getElementById('frame');-->
+<!--            img.src = "{{ url_for('video_feed') }}";-->
+<!--            setTimeout(updateFrame, 1000);  // Update the frame every 1 second-->
+<!--        }-->
+<!--    </script>-->
+</head>
+<body onload="process_frames()">
+    <h1>Real-time Image Processing</h1>
+    <img id="frame" src="backend-image-processing/tmp/img.png">
+</body>
+</html>

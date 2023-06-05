@@ -3,6 +3,11 @@ import mediapipe as mp
 import numpy as np
 import threading
 import tensorflow as tf
+import logging
+import requests
+logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
+server_url = "http://10.0.0.12:5002"
+
 
 no_of_timesep_squat = 5  # TODO: was 60
 label = "Squat...."
@@ -230,18 +235,25 @@ def squatDetect():
     print_success()
 
 
-def image_processing(image_to_analyze: np.ndarray):
+def image_processing(image_to_analyze: np.ndarray, counter ,state, nose, r_hip,l_hip, flag):
     model = tf.keras.models.load_model('medium_squat_cnn_model3.h5')
+
+    # state = "standing"
+    # nose = 0
+    # r_hip = 0
+    # l_hip = 0
+    # flag = True
+    # counter = 0
 
     n_time_steps = no_of_timesep_squat
     lm_list = []
     label = None
     image = None
-    nose = 0
-    r_hip = 0
-    l_hip = 0
-    flag = True
-    counter = 0
+    # nose = 0
+    # r_hip = 0
+    # l_hip = 0
+    # flag = True
+    # counter = 0
     fps = 0
     mpPose = mp.solutions.pose
     pose = mpPose.Pose()
@@ -252,7 +264,6 @@ def image_processing(image_to_analyze: np.ndarray):
 
     if img is None:
         print_success()
-
         raise Exception("Image is empty")
 
     imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -274,6 +285,16 @@ def image_processing(image_to_analyze: np.ndarray):
                 l_hip = landmarks[mpPose.PoseLandmark.LEFT_HIP.value]
                 flag = False
 
+            if is_squatting(landmarks, nose, r_hip, l_hip):
+                if state == "standing":
+                    # User just started squatting
+                    state = "squatting"
+            else:
+                if state == "squatting":
+                    # User just finished a squat
+                    state = "standing"
+                    counter += 1
+
             # print(f"nose={nose.y}\nrhip={r_hip.y}\nlhip={l_hip.y}\n")
             # Check if the user is squatting
 
@@ -294,13 +315,13 @@ def image_processing(image_to_analyze: np.ndarray):
                 img = draw_landmark_on_image(mpDraw, results, imgRGB, mpPose)
 
             img = draw_class_on_image(label, counter, img)
-            # cv2.imshow("Image", img)
+            cv2.imshow("Image", img)
             # convert image to bytes
             _, buffer = cv2.imencode('.jpg', img)
 
             image = buffer.tobytes()
             cv2.imwrite("a.png",img)
-            return image, label
+            return image, label , counter ,state, nose, r_hip,l_hip,flag
         return None, "Body not detected"
 
     except ValueError:

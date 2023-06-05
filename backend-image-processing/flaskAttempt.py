@@ -1,10 +1,20 @@
 import flask
 from flask import request, Response
-import requests
+import logging
+
+# Configure the logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
+
 
 from testing import squatDetect, image_processing
 
 app = flask.Flask(__name__)
+app.config['counter'] = 0
+app.config['state'] = 'standing'
+app.config['nose'] = None
+app.config['r_hip'] = None
+app.config['l_hip'] = None
+app.config['flag'] = True
 
 
 # to display the connection status
@@ -53,7 +63,14 @@ def analyze_image():
         }
     image_file = request.files['image']
     image_data = image_file.read()
-    processed_image, label = image_processing(image_data)
+    logging.info(app.config['flag'])
+    processed_image, label, counter ,state, nose, r_hip,l_hip,flag = image_processing(image_data,app.config['counter'],app.config['state'],app.config['nose'],app.config['r_hip'],app.config['l_hip'],app.config['flag'])
+    app.config['counter'] = counter
+    app.config['state'] = state
+    app.config['nose'] = nose
+    app.config['r_hip'] = r_hip
+    app.config['l_hip'] = l_hip
+    app.config['flag'] = flag
 
     # return {
     #     "message": "Image analyzed successfully",
@@ -62,7 +79,14 @@ def analyze_image():
     #         "label": label
     #     }
     # }
-    return label
+    logging.info(app.config['flag'])
+    logging.info(app.config['state'])
+    logging.info(app.config['counter'])
+    return  {
+        "label": label,
+        "counter":app.config['counter']
+    }
+    # return label
 
     # response image as a mime type
     # return Response(processed_image, mimetype='image/jpeg')
