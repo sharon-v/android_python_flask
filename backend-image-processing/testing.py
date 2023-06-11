@@ -5,9 +5,9 @@ import threading
 import tensorflow as tf
 import logging
 import requests
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
 server_url = "http://10.0.0.12:5002"
-
 
 no_of_timesep_squat = 5  # TODO: was 60
 label = "Squat...."
@@ -78,7 +78,7 @@ def detect(model, lm_list):
     results = model.predict(lm_list, verbose=0)
 
     num_labels = 6
-
+    global label
     labels = {
         0: "Normal",
         1: "Uneven back",
@@ -112,8 +112,13 @@ def is_squatting(landmarks, prev_nose, prev_r_hip, prev_l_hip):
 
     # Check if the person is lowering their hips by comparing their current position to the previous position
     if nose.y + 0.02 < prev_nose.y and right_hip.y + 0.02 < prev_r_hip.y and left_hip.y + 0.02 < prev_l_hip.y:
+    # if nose.y + 0.05 < prev_nose.y and right_hip.y + 0.05 < prev_r_hip.y and left_hip.y + 0.05 < prev_l_hip.y:
+    # if nose.y + 0.10 < prev_nose.y and right_hip.y + 0.10 < prev_r_hip.y and left_hip.y + 0.10 < prev_l_hip.y:
+    #     print ("true"+str(nose.y) , str(prev_nose.y) , str(right_hip.y) , str(prev_r_hip.y) , str(left_hip.y) , str(prev_l_hip.y))
         return True
     else:
+        # print ("false"+str(nose.y) , str(prev_nose.y) , str(right_hip.y) , str(prev_r_hip.y) , str(left_hip.y) , str(prev_l_hip.y))
+
         return False
 
 
@@ -139,7 +144,7 @@ def squatDetect():
     # model = tf.keras.models.load_model('medium_squat_cnn_model.h5')
     # model = tf.keras.models.load_model('medium_squat_cnn_model1.h5')
     # model = tf.keras.models.load_model('medium_squat_cnn_model2.h5')
-    model = tf.keras.models.load_model('medium_squat_cnn_model3.h5')
+    model = tf.keras.models.load_model('medium_squat_cnn_model.h5')
 
     # print(model.input_shape)
     cap = cv2.VideoCapture(0)
@@ -170,6 +175,7 @@ def squatDetect():
         imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
         results = pose.process(imgRGB)
+        # label= "normal"
         global label
 
         try:
@@ -213,13 +219,14 @@ def squatDetect():
                     c_lm = make_landmark_timestep(results)
 
                     lm_list.append(c_lm)
-                    if len(lm_list) == n_time_steps:
+                    if len(lm_list) > n_time_steps:
                         t1 = threading.Thread(target=detect, args=(model, lm_list,))
                         t1.start()
                         lm_list = []
 
                     img = draw_landmark_on_image(mpDraw, results, img, mpPose)
                 img = draw_class_on_image(label, counter, img)
+                # print(label)
                 cv2.imshow("Image", img)
                 if cv2.waitKey(1) == 27:
                     break
@@ -235,29 +242,13 @@ def squatDetect():
     print_success()
 
 
-def image_processing(image_to_analyze: np.ndarray, counter ,state, nose, r_hip,l_hip, flag):
-    model = tf.keras.models.load_model('medium_squat_cnn_model3.h5')
+def image_processing(image_to_analyze: np.ndarray, counter, state, nose, r_hip, l_hip, flag):
+    model = tf.keras.models.load_model('medium_squat_cnn_model1.h5')
 
-    # state = "standing"
-    # nose = 0
-    # r_hip = 0
-    # l_hip = 0
-    # flag = True
-    # counter = 0
-
-    n_time_steps = no_of_timesep_squat
     lm_list = []
     label = None
-    image = None
-    # nose = 0
-    # r_hip = 0
-    # l_hip = 0
-    # flag = True
-    # counter = 0
-    fps = 0
     mpPose = mp.solutions.pose
     pose = mpPose.Pose()
-
     mpDraw = mp.solutions.drawing_utils
 
     img = cv2.imdecode(np.frombuffer(image_to_analyze, dtype=np.uint8), cv2.IMREAD_UNCHANGED)
@@ -320,10 +311,16 @@ def image_processing(image_to_analyze: np.ndarray, counter ,state, nose, r_hip,l
             _, buffer = cv2.imencode('.jpg', img)
 
             image = buffer.tobytes()
-            cv2.imwrite("a.png",img)
-            return image, label , counter ,state, nose, r_hip,l_hip,flag
+            cv2.imwrite("a.png", img)
+            nose = landmarks[mpPose.PoseLandmark.NOSE.value]
+            r_hip = landmarks[mpPose.PoseLandmark.RIGHT_HIP.value]
+            l_hip = landmarks[mpPose.PoseLandmark.LEFT_HIP.value]
+            return image, label, counter, state, nose, r_hip, l_hip, flag, landmarks
         return None, "Body not detected"
 
     except ValueError:
         label = "Body not detected"
         print(label)
+
+
+squatDetect()

@@ -1,8 +1,11 @@
 import flask
-from flask import request, Response
+from flask import request, Response, jsonify
 import logging
 
+
 # Configure the logging
+from google.protobuf.json_format import MessageToDict
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
 
 
@@ -46,6 +49,11 @@ app.config['flag'] = True
 #         "video_meta_data": video_data
 #     }
 
+@app.route('/init-counter', methods=['POST'])
+def init_counter():
+    app.config['counter'] = 0
+    return "Counter initialized successfully"
+
 
 @app.route('/analyze-image', methods=['POST'])
 def analyze_image():
@@ -64,7 +72,7 @@ def analyze_image():
     image_file = request.files['image']
     image_data = image_file.read()
     logging.info(app.config['flag'])
-    processed_image, label, counter ,state, nose, r_hip,l_hip,flag = image_processing(image_data,app.config['counter'],app.config['state'],app.config['nose'],app.config['r_hip'],app.config['l_hip'],app.config['flag'])
+    processed_image, label, counter ,state, nose, r_hip, l_hip,flag, landmarks = image_processing(image_data,app.config['counter'],app.config['state'],app.config['nose'],app.config['r_hip'],app.config['l_hip'],app.config['flag'])
     app.config['counter'] = counter
     app.config['state'] = state
     app.config['nose'] = nose
@@ -82,11 +90,23 @@ def analyze_image():
     logging.info(app.config['flag'])
     logging.info(app.config['state'])
     logging.info(app.config['counter'])
-    return  {
-        "label": label,
-        "counter":app.config['counter']
-    }
+    # return  {
+    #     "label": label,
+    #     "counter":app.config['counter'],
+    #     "landmarks": landmarks
+    # }
     # return label
+    landmarks_dict = [MessageToDict(l) for l in landmarks]
+
+    # Prepare the response data
+    response_data = {
+        'label': label,
+        'counter': counter,
+        'landmarks': landmarks_dict
+    }
+
+    # Return the response as JSON
+    return jsonify(response_data)
 
     # response image as a mime type
     # return Response(processed_image, mimetype='image/jpeg')
