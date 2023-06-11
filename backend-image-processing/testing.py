@@ -144,7 +144,7 @@ def squatDetect():
     # model = tf.keras.models.load_model('medium_squat_cnn_model.h5')
     # model = tf.keras.models.load_model('medium_squat_cnn_model1.h5')
     # model = tf.keras.models.load_model('medium_squat_cnn_model2.h5')
-    model = tf.keras.models.load_model('medium_squat_cnn_model.h5')
+    model = tf.keras.models.load_model('medium_squat_cnn_model1.h5')
 
     # print(model.input_shape)
     cap = cv2.VideoCapture(0)
