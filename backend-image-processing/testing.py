@@ -243,7 +243,7 @@ def squatDetect():
 
 
 def image_processing(image_to_analyze: np.ndarray, counter, state, nose, r_hip, l_hip, flag):
-    model = tf.keras.models.load_model('medium_squat_cnn_model1.h5')
+    model = tf.keras.models.load_model('medium_squat_cnn_model6.h5')
 
     lm_list = []
     label = None
@@ -316,11 +316,11 @@ def image_processing(image_to_analyze: np.ndarray, counter, state, nose, r_hip, 
             r_hip = landmarks[mpPose.PoseLandmark.RIGHT_HIP.value]
             l_hip = landmarks[mpPose.PoseLandmark.LEFT_HIP.value]
             return image, label, counter, state, nose, r_hip, l_hip, flag, landmarks
-        return None, "Body not detected"
+        return None, "Body not detected" , None ,None ,None ,None,None,None,None
 
     except ValueError:
         label = "Body not detected"
         print(label)
 
 
-squatDetect()
+# squatDetect()

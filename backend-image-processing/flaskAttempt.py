@@ -73,12 +73,13 @@ def analyze_image():
     image_data = image_file.read()
     logging.info(app.config['flag'])
     processed_image, label, counter ,state, nose, r_hip, l_hip,flag, landmarks = image_processing(image_data,app.config['counter'],app.config['state'],app.config['nose'],app.config['r_hip'],app.config['l_hip'],app.config['flag'])
-    app.config['counter'] = counter
-    app.config['state'] = state
-    app.config['nose'] = nose
-    app.config['r_hip'] = r_hip
-    app.config['l_hip'] = l_hip
-    app.config['flag'] = flag
+    if counter is not None:
+        app.config['counter'] = counter
+        app.config['state'] = state
+        app.config['nose'] = nose
+        app.config['r_hip'] = r_hip
+        app.config['l_hip'] = l_hip
+        app.config['flag'] = flag
 
     # return {
     #     "message": "Image analyzed successfully",
@@ -96,7 +97,10 @@ def analyze_image():
     #     "landmarks": landmarks
     # }
     # return label
-    landmarks_dict = [MessageToDict(l) for l in landmarks]
+    if landmarks is not None:
+        landmarks_dict = [MessageToDict(l) for l in landmarks]
+    else:
+        landmarks_dict = None
 
     # Prepare the response data
     response_data = {
